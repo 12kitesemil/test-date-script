@@ -4,6 +4,13 @@ const moment = require('moment')
 require('dotenv').config()
 
 
+//create folder for results/screenshots
+if (!fs.existsSync(`${__dirname}/results`)) {
+  fs.mkdirSync(`${__dirname}/results`);
+}
+
+
+
 const pause = function (time) {
   console.log(`Waiting ${time / 1000} seconds...`)
   return new Promise((resolve) => {
