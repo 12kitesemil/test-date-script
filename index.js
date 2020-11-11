@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const moment = require('moment')
+const fs = require('fs-extra')
 
 require('dotenv').config()
 
@@ -20,17 +21,10 @@ const pause = function (time) {
 
 
 
-let date = moment().format('DD/MM/YY')
+let date = moment().add(1, 'month').format('DD/MM/YY')
 let n = 0
 
 check = async () => {
-
-  if (n === 6) {
-    console.log('Nothing found... Stopping search.')
-    await browser.close();
-    return
-  } 
-
   console.log(`Searching for tests around ${date}....`)
 
   //headless needs to be set to false to bypass anitcrawling measure
@@ -87,7 +81,7 @@ check = async () => {
   ])
 
 
-  //get the first h5 from teh page == results for the closest test centre 
+  //get the first h5 from the page == results for the closest test centre 
   let searchResult = await page.evaluate(() => document.querySelector('h5').innerText);
 
 
@@ -96,11 +90,17 @@ check = async () => {
   const pattern = /\d/
   let containsNumber = pattern.test(searchResult)
   
-
+  await pause(5000)
 
   //if there is no dates found
   if (!containsNumber) {
     n++
+
+    //tests can be booked max 18weeks (≈4 months) in advance
+    if (n === 4) {
+      console.log('Nothing found... Stopping search.')
+      await browser.close();
+    } 
 
     //add a week to the booking date
     date = moment(date, 'DD/MM/YY').add(1, 'month').format('DD/MM/YY')
@@ -112,7 +112,8 @@ check = async () => {
 
   } else {
     console.log('found something!')
-    await page.screenshot({ path: 'test-found.png' })
+    await page.screenshot({ path: `${__dirname}/results/test-found--${moment().format('DD-MM-YYYY hh:mm:ss')}.png` })
+    await browser.close();
   }
 
 }
@@ -120,9 +121,13 @@ check = async () => {
 check()
 
 
+//working postcodes  EN3 7XY
+
 //
 // let str = '– available tests around 17/03/2021'
 // let str2 = '- No dates available'
 
 // const pattern = /\d/
 // console.log(pattern.test(str))
+
+
