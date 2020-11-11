@@ -14,10 +14,15 @@ const pause = function (time) {
 
 
 let date = moment().format('DD/MM/YY')
-
-
+let n = 0
 
 check = async () => {
+
+  if (n === 6) {
+    console.log('Nothing found... Stopping search.')
+    await browser.close();
+    return
+  } 
 
   console.log(`Searching for tests around ${date}....`)
 
@@ -85,8 +90,10 @@ check = async () => {
   let containsNumber = pattern.test(searchResult)
   
 
+
   //if there is no dates found
   if (!containsNumber) {
+    n++
 
     //add a week to the booking date
     date = moment(date, 'DD/MM/YY').add(1, 'month').format('DD/MM/YY')
