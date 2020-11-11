@@ -13,11 +13,11 @@ const pause = function (time) {
 
 
 
-let date = moment().add(1, 'month').format('DD-MM-YYYY')
+let date = moment().format('DD/MM/YY')
 
 
 
-const check = async () => {
+check = async () => {
 
   console.log(`Searching for tests around ${date}....`)
 
@@ -79,19 +79,19 @@ const check = async () => {
   let searchResult = await page.evaluate(() => document.querySelector('h5').innerText);
 
 
-  searchResult = searchResult.trim()
-
-
+  
+  //If there is a test available, date is show in result
+  const pattern = /\d/
+  let containsNumber = pattern.test(searchResult)
+  
 
   //if there is no dates found
-  if (searchResult.length === 16) {
+  if (!containsNumber) {
 
     //add a week to the booking date
+    date = moment(date, 'DD/MM/YY').add(1, 'month').format('DD/MM/YY')
 
-    date = moment(date, 'DD-MM-YYYY').add(7, 'days').format('DD-MM-YYYY')
 
-
-    //run search again with new date?
     await browser.close();
     await pause(10500)
     check()
@@ -101,6 +101,14 @@ const check = async () => {
     await page.screenshot({ path: 'test-found.png' })
   }
 
-};
+}
 
 check()
+
+
+//
+// let str = '– available tests around 17/03/2021'
+// let str2 = '- No dates available'
+
+// const pattern = /\d/
+// console.log(pattern.test(str))
