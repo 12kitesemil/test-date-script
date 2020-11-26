@@ -21,7 +21,10 @@ const pause = function (time) {
 
 
 
-let checkDate = async (date) => {
+let date = moment().add(2, 'month').format('DD/MM/YY')
+let n = 0
+
+check = async () => {
   console.log(`Searching for tests around ${date}....`)
 
   //headless needs to be set to false to bypass anitcrawling measure
@@ -82,7 +85,7 @@ let checkDate = async (date) => {
   let searchResult = await page.evaluate(() => document.querySelector('h5').innerText);
 
 
-
+  
   //If there is a test available, date is show in result
   const pattern = /\d/
   let containsNumber = pattern.test(searchResult)
@@ -90,45 +93,27 @@ let checkDate = async (date) => {
 
   //if there is no dates found
   if (!containsNumber) {
+    n++
 
     //tests can be booked max 18weeks (≈4 months) in advance
-
+    if (n === 4) {
+      console.log('Nothing found... Stopping search.')
+      await browser.close();
+    } 
 
     //add a month to the booking date
-
+    date = moment(date, 'DD/MM/YY').add(1, 'month').format('DD/MM/YY')
 
 
     await browser.close();
     await pause(10500)
-    return false
+    check()
 
   } else {
     console.log('found something!')
     await page.screenshot({ path: `${__dirname}/results/test-found--${moment().format('DD-MM-YYYY hh:mm:ss')}.png` })
     await browser.close();
-    return true
   }
-
-}
-
-let check = async () => {
-  let date = moment().add(1, 'month')
-  let n = 0
-  let found = false
-
-  // do {
-  //   found = await checkDate(date);
-  //   date = moment(date, 'DD/MM/YY').add(1, 'month').format('DD/MM/YY')
-  //   n++;
-  // } while (!found && n < 4)
-
-
-  while (!found && n < 3) {
-    found = await checkDate(date.format('DD/MM/YY'));
-    date = date.add(1, 'month')
-    n++;
-  }
-
 
 }
 
