@@ -1,3 +1,5 @@
+'use strict';
+
 const puppeteer = require('puppeteer');
 const moment = require('moment')
 const fs = require('fs-extra')
